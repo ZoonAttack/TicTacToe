@@ -53,14 +53,12 @@ namespace TicTacToe
             //Sending a copy from the original board
             char[,] currentBoard = new char[3, 3];
             Array.Copy(board, currentBoard, board.Length);
-            Algorithms.DFS(currentBoard, true);
-            for(int i = 0; i < 3; i++)
-            {
-                for(int j = 0; j < 3; j++)
-                {
-                    Console.WriteLine(currentBoard[i, j]);
-                }
-            }
+
+            Tuple<int, int> firstmove = null;
+
+            Algorithms.DFS(currentBoard, true, ref firstmove);
+
+            UpdateButtons(firstmove.Item1, firstmove.Item2);
         }
         public static void UpdateButtons(int row, int col)
         {

@@ -1,14 +1,18 @@
 ﻿namespace TicTacToe
 {
+    enum States
+    {
+        VALIDMOVE, 
+        INVALIDMOVE
+    }
     public class Algorithms
     {
-        static int  currentPlays = 1;
-        public static bool DFS(char[,] currentBoard, bool isComputerTurn)
-        {
-            if (checkState(currentBoard, 'X')) return false; //Human wins
-            if (checkState(currentBoard, 'O')) { return true; } //Computer wins
-            if (isDraw()){ return false; }
+        static States currentState;
 
+        static int currentPlays = Game.plays;
+
+        public static void DFS(char[,] currentBoard, bool isComputerTurn, ref Tuple<int, int> firstMove)
+        {            
             for(int i = 0; i < 3; i++)
             {
                 for(int j = 0; j < 3; j++)
@@ -16,47 +20,55 @@
                     if (currentBoard[i,j] == '\0')
                     {
                         currentBoard[i, j] = isComputerTurn ? 'O' : 'X';
+                        if(isComputerTurn && firstMove == null) 
+                            firstMove = new Tuple<int, int>(i, j);
+                        
                         currentPlays++;
-                        bool result = DFS(currentBoard, !isComputerTurn);
+                        DFS(currentBoard, !isComputerTurn, ref firstMove); //Try out that path
                         currentPlays--;
-                        currentBoard[i, j] = '\0';
-
-                        //If algorithm found a winning state.. take turn and send true(Found winning state)
-                        if (isComputerTurn && result)
-                        {
-                            Game.board[i, j] = 'O';
-                            Game.UpdateButtons(i, j);
-                            return true;
-                        }
+                        
+                        //If no valid move just keep backtracking
+                        if(currentState != States.VALIDMOVE)
+                            currentBoard[i, j] = '\0';
                     }
                 }
             }
+            //If board full
+            if (currentPlays >= 9)
+            {
+                //if Reached a winning state.
+                if (checkState(currentBoard)) currentState = States.VALIDMOVE;
+                return;
+            }
+            if (currentState != States.VALIDMOVE)
+            {
+                //Found valid move 
+                firstMove = null;
+                return;
+            }
+        }
+        private static bool checkState(char[,] currentBoard, char player = 'O')
+        {
+                //Horizontal check
+                if (currentBoard[0, 0] == player && currentBoard[0, 1] == player && currentBoard[0, 2] == player) return true;
+                if (currentBoard[1, 0] == player && currentBoard[1, 1] == player && currentBoard[1, 2] == player) return true;
+                if (currentBoard[2, 0] == player && currentBoard[2, 1] == player && currentBoard[2, 2] == player) return true;
+                //Vertical check
+                if (currentBoard[0, 0] == player && currentBoard[1, 0] == player && currentBoard[2, 0] == player) return true;
+                if (currentBoard[0, 1] == player && currentBoard[1, 1] == player && currentBoard[2, 1] == player) return true;
+                if (currentBoard[0, 2] == player && currentBoard[1, 2] == player && currentBoard[2, 2] == player) return true;
+                //Diagonal
+                if (currentBoard[0, 0] == player && currentBoard[1, 1] == player && currentBoard[2, 2] == player) return true;
+                if (currentBoard[2, 0] == player && currentBoard[1, 1] == player && currentBoard[0, 2] == player) return true;
 
-
+            //Not a win state.
+            currentState = States.INVALIDMOVE;
             return false;
         }
-        private static bool checkState(char[,] currentBoard, char player)
+        private static void isDraw()
         {
-            //Horizontal check
-            if (currentBoard[0, 0] == player && currentBoard[0, 1] == player && currentBoard[0, 2] == player) return true;
-            if (currentBoard[1, 0] == player && currentBoard[1, 1] == player && currentBoard[1, 2] == player) return true;
-            if (currentBoard[2, 0] == player && currentBoard[2, 1] == player && currentBoard[2, 2] == player) return true;
-            //Vertical check
-            if (currentBoard[0, 0] == player && currentBoard[1, 0] == player && currentBoard[2, 0] == player) return true;
-            if (currentBoard[0, 1] == player && currentBoard[1, 1] == player && currentBoard[2, 1] == player) return true;
-            if (currentBoard[0, 2] == player && currentBoard[1, 2] == player && currentBoard[2, 2] == player) return true;
-            //Diagonal
-            if (currentBoard[0, 0] == player && currentBoard[1, 1] == player && currentBoard[2, 2] == player) return true;
-            if (currentBoard[2, 0] == player && currentBoard[1, 1] == player && currentBoard[0, 2] == player) return true;
-
-            //Draw
-            //check for win/loss conditions and draws
-            return false;
-        }
-        private static bool isDraw()
-        {
-            if (currentPlays == 9) return true;
-            return false;
+            //Not a win state
+            if (currentPlays == 9) currentState = States.INVALIDMOVE;
         }
     }
 }
