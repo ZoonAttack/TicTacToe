@@ -57,7 +57,6 @@ namespace TicTacToe
             Tuple<int, int> firstmove = null;
 
             Algorithms.DFS(currentBoard, true, ref firstmove);
-
             UpdateButtons(firstmove.Item1, firstmove.Item2);
         }
         public static void UpdateButtons(int row, int col)
@@ -77,7 +76,6 @@ namespace TicTacToe
                 pressedButton.Enabled = false;
                 plays++;
             }
-            
         }
 
         private void ResetBTN_Click(object sender, EventArgs e)

@@ -20,7 +20,7 @@
                     if (currentBoard[i,j] == '\0')
                     {
                         currentBoard[i, j] = isComputerTurn ? 'O' : 'X';
-                        if(isComputerTurn && firstMove == null) 
+                        if(isComputerTurn && firstMove == null && currentPlays == Game.plays) 
                             firstMove = new Tuple<int, int>(i, j);
                         
                         currentPlays++;
@@ -33,17 +33,14 @@
                     }
                 }
             }
-            //If board full
-            if (currentPlays >= 9)
+            if (checkState(currentBoard))
             {
-                //if Reached a winning state.
-                if (checkState(currentBoard)) currentState = States.VALIDMOVE;
+                currentState = States.VALIDMOVE;
                 return;
             }
-            if (currentState != States.VALIDMOVE)
+            if (currentState == States.INVALIDMOVE)
             {
                 //Found valid move 
-                firstMove = null;
                 return;
             }
         }
