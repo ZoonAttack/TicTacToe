@@ -2,49 +2,60 @@
 {
     enum States
     {
-        VALIDMOVE, 
-        INVALIDMOVE
+        WINNINGPATH, 
+        INVALIDPATH
     }
     public class Algorithms
     {
-        static States currentState;
+        static States currentState = States.INVALIDPATH;
 
         static int currentPlays = Game.plays;
-
+        static bool isDraw = false;
+        static bool firstMoveDone = false;
         public static void DFS(char[,] currentBoard, bool isComputerTurn, ref Tuple<int, int> firstMove)
-        {            
+        {
+            //If winning path is found. dont try other paths
+            if (currentState == States.WINNINGPATH)
+            {
+                return;
+            }
             for(int i = 0; i < 3; i++)
             {
                 for(int j = 0; j < 3; j++)
                 {
+                    //If current cell is empty
                     if (currentBoard[i,j] == '\0')
                     {
                         currentBoard[i, j] = isComputerTurn ? 'O' : 'X';
-                        if(isComputerTurn && firstMove == null && currentPlays == Game.plays) 
+                        if (currentPlays == Game.plays) firstMoveDone = true;
+
+                        if(isComputerTurn && firstMove == null && firstMoveDone) 
                             firstMove = new Tuple<int, int>(i, j);
                         
                         currentPlays++;
                         DFS(currentBoard, !isComputerTurn, ref firstMove); //Try out that path
-                        currentPlays--;
-                        
+
                         //If no valid move just keep backtracking
-                        if(currentState != States.VALIDMOVE)
+                        if (currentState != States.WINNINGPATH)
+                        {
                             currentBoard[i, j] = '\0';
+                            currentPlays--;
+                            if (i == firstMove.Item1 && j == firstMove.Item2)
+                            {
+                                firstMoveDone = false;
+                                firstMove = null;
+                            }
+                        }
                     }
                 }
             }
-            if (checkState(currentBoard))
+            //After finishing this path.. check if it results in a win 
+            if(checkState(currentBoard))
             {
-                currentState = States.VALIDMOVE;
-                return;
-            }
-            if (currentState == States.INVALIDMOVE)
-            {
-                //Found valid move 
-                return;
+                currentState = States.WINNINGPATH;
             }
         }
-        private static bool checkState(char[,] currentBoard, char player = 'O')
+        public static bool checkState(char[,] currentBoard, char player = 'O')
         {
                 //Horizontal check
                 if (currentBoard[0, 0] == player && currentBoard[0, 1] == player && currentBoard[0, 2] == player) return true;
@@ -59,13 +70,15 @@
                 if (currentBoard[2, 0] == player && currentBoard[1, 1] == player && currentBoard[0, 2] == player) return true;
 
             //Not a win state.
-            currentState = States.INVALIDMOVE;
+            currentState = States.INVALIDPATH;
             return false;
         }
-        private static void isDraw()
+        public static void ResetData()
         {
-            //Not a win state
-            if (currentPlays == 9) currentState = States.INVALIDMOVE;
+            currentState = States.INVALIDPATH;
+            currentPlays = Game.plays;
+            isDraw = false;
+            firstMoveDone = false;
         }
     }
 }

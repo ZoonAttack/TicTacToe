@@ -36,7 +36,14 @@ namespace TicTacToe
 
         private void Button_Click(object sender, EventArgs e)
         {
-           Button button = (Button)sender;
+
+            if (AlgorithmsLB.SelectedItem == null)
+            {
+                MessageBox.Show("Choose an algorithm first please..");
+                return;
+            }
+
+            Button button = (Button)sender;
 
             int index = int.Parse(button.Tag.ToString());
 
@@ -49,15 +56,9 @@ namespace TicTacToe
                 button.Text = "X";
                 button.Enabled = false;
             }
+
+            runAlgorithm(AlgorithmsLB.SelectedItem.ToString());
             plays++;
-            //Sending a copy from the original board
-            char[,] currentBoard = new char[3, 3];
-            Array.Copy(board, currentBoard, board.Length);
-
-            Tuple<int, int> firstmove = null;
-
-            Algorithms.DFS(currentBoard, true, ref firstmove);
-            UpdateButtons(firstmove.Item1, firstmove.Item2);
         }
         public static void UpdateButtons(int row, int col)
         {
@@ -80,7 +81,53 @@ namespace TicTacToe
 
         private void ResetBTN_Click(object sender, EventArgs e)
         {
-            //BoardGB.Controls.Clear();
+            foreach(var item in buttons)
+            {
+                item.Value.Enabled = true;
+                item.Value.Text = string.Empty;
+            }
+            board = new char[3, 3];
+        }
+
+        private void checkWinner()
+        {
+            if (Algorithms.checkState(board, 'X')) MessageBox.Show("HUMAN WINS");
+            else if (Algorithms.checkState(board)) MessageBox.Show("COMPUTER WINS");
+            else
+            { 
+                if (plays == 9) 
+                    MessageBox.Show("DRAW"); 
+            }
+        }
+        private void runAlgorithm(string name)
+        {
+            //Sending a copy from the original board
+            char[,] currentBoard = new char[3, 3];
+            Array.Copy(board, currentBoard, board.Length);
+
+            Tuple<int, int> firstmove = null;
+            Algorithms.ResetData();
+            switch (name)
+            {
+                case "DFS":
+                    Algorithms.DFS(currentBoard, true, ref firstmove);
+                    break;
+                case "BFS":
+                    break;
+                case "Iterative Deepening":
+                    break;
+                case "UCS":
+                    break;
+                default:
+                    break;
+            }
+            if (firstmove != null)
+            {
+                board[firstmove.Item1, firstmove.Item2] = 'O';
+                UpdateButtons(firstmove.Item1, firstmove.Item2);
+            }
+
+            checkWinner();
         }
     }
 }
