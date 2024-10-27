@@ -7,7 +7,7 @@
         static int currentPlays = Game.plays;
         static bool isDraw = false;
         static bool firstMoveDone = false;
-        public static void DFS(char[,] currentBoard, bool isComputerTurn, ref Tuple<int, int> firstMove)
+        public static void DFS(char[,] currentBoard, bool isComputerTurn, ref Tuple<int, int> firstMove, ref Tuple<int, int> sacrificeMove)
         {
             //If winning path is found. dont try other paths
             if (currentState == ENUMS.AlgorithmState.WINNINGPATH)
@@ -28,7 +28,7 @@
                             firstMove = new Tuple<int, int>(i, j);
                         
                         currentPlays++;
-                        DFS(currentBoard, !isComputerTurn, ref firstMove); //Try out that path
+                        DFS(currentBoard, !isComputerTurn, ref firstMove, ref sacrificeMove); //Try out that path
 
                         //If no valid move just keep backtracking
                         if (currentState != ENUMS.AlgorithmState.WINNINGPATH)
@@ -51,6 +51,12 @@
                 currentState = ENUMS.AlgorithmState.WINNINGPATH;
                 return;
             }
+            //If not then temporarily store the sacrifice move
+            if(CheckWin(currentBoard, 'X'))
+            {
+                sacrificeMove = firstMove;
+            }
+
             //If not a win then check whether its the human who won or draw
             //CheckState(currentBoard);
         }

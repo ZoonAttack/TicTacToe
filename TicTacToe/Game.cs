@@ -110,12 +110,13 @@ namespace TicTacToe
             char[,] currentBoard = new char[3, 3];
             Array.Copy(board, currentBoard, board.Length);
 
-            Tuple<int, int> firstmove = null;
+            Tuple<int, int> firstMove = null;
+            Tuple<int, int> sacrificeMove = null;
             Algorithms.ResetData();
             switch (name)
             {
                 case "DFS":
-                    Algorithms.DFS(currentBoard, true, ref firstmove);
+                    Algorithms.DFS(currentBoard, true, ref firstMove, ref sacrificeMove);
                     plays++;
                     break;
                 case "BFS":
@@ -127,10 +128,20 @@ namespace TicTacToe
                 default:
                     break;
             }
-            if (firstmove != null)
+            if (firstMove != null)
             {
-                board[firstmove.Item1, firstmove.Item2] = 'O';
-                UpdateButtons(firstmove.Item1, firstmove.Item2);
+                board[firstMove.Item1, firstMove.Item2] = 'O';
+                UpdateButtons(firstMove.Item1, firstMove.Item2);
+            }
+            if (sacrificeMove != null)
+            {
+                if (firstMove == null)
+                {
+                    board[sacrificeMove.Item1, sacrificeMove.Item2] = 'O';
+                    UpdateButtons(sacrificeMove.Item1, sacrificeMove.Item2);
+                    MessageBox.Show(sacrificeMove.Item1.ToString() + sacrificeMove.Item2.ToString());
+
+                }
             }
             checkWinner();
         }
