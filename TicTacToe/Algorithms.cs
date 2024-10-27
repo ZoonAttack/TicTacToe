@@ -1,13 +1,8 @@
 ﻿namespace TicTacToe
 {
-    enum States
-    {
-        WINNINGPATH, 
-        INVALIDPATH
-    }
     public class Algorithms
     {
-        static States currentState = States.INVALIDPATH;
+        static ENUMS.AlgorithmState currentState = ENUMS.AlgorithmState.INVALIDPATH;
 
         static int currentPlays = Game.plays;
         static bool isDraw = false;
@@ -15,7 +10,7 @@
         public static void DFS(char[,] currentBoard, bool isComputerTurn, ref Tuple<int, int> firstMove)
         {
             //If winning path is found. dont try other paths
-            if (currentState == States.WINNINGPATH)
+            if (currentState == ENUMS.AlgorithmState.WINNINGPATH)
             {
                 return;
             }
@@ -36,7 +31,7 @@
                         DFS(currentBoard, !isComputerTurn, ref firstMove); //Try out that path
 
                         //If no valid move just keep backtracking
-                        if (currentState != States.WINNINGPATH)
+                        if (currentState != ENUMS.AlgorithmState.WINNINGPATH)
                         {
                             currentBoard[i, j] = '\0';
                             currentPlays--;
@@ -50,12 +45,16 @@
                 }
             }
             //After finishing this path.. check if it results in a win 
-            if(checkState(currentBoard))
+            if (CheckWin(currentBoard))
             {
-                currentState = States.WINNINGPATH;
+                //If win then its a winning path
+                currentState = ENUMS.AlgorithmState.WINNINGPATH;
+                return;
             }
+            //If not a win then check whether its the human who won or draw
+            //CheckState(currentBoard);
         }
-        public static bool checkState(char[,] currentBoard, char player = 'O')
+        public static bool CheckWin(char[,] currentBoard, char player = 'O')
         {
                 //Horizontal check
                 if (currentBoard[0, 0] == player && currentBoard[0, 1] == player && currentBoard[0, 2] == player) return true;
@@ -70,15 +69,28 @@
                 if (currentBoard[2, 0] == player && currentBoard[1, 1] == player && currentBoard[0, 2] == player) return true;
 
             //Not a win state.
-            currentState = States.INVALIDPATH;
+            if(player == 'O')currentState = ENUMS.AlgorithmState.INVALIDPATH;
             return false;
         }
+
+        //private static void CheckState(char[,] currentBoard)
+        //{
+        //    //If an INVALIDPATH goal has been reached
+        //    if(currentState != ENUMS.AlgorithmState.WINNINGPATH)
+        //    {
+        //        //Check if human has won
+        //        if (CheckWin(currentBoard, 'X')) Game.GameState = ENUMS.GameState.HUMANWIN;
+        //        //If not then it's a draw
+        //        else Game.GameState = ENUMS.GameState.DRAW;
+        //    }
+        //}
         public static void ResetData()
         {
-            currentState = States.INVALIDPATH;
+            currentState = ENUMS.AlgorithmState.INVALIDPATH;
             currentPlays = Game.plays;
             isDraw = false;
             firstMoveDone = false;
         }
+
     }
 }
