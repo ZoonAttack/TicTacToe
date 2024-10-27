@@ -8,12 +8,12 @@ namespace TicTacToe
             WINNINGPATH,
             INVALIDPATH,
         }
-        //public enum GameState
-        //{
-        //    COMPUTERWIN,
-        //    HUMANWIN,
-        //    DRAW
-        //}
+        public enum GameState
+        {
+            COMPUTERWIN,
+            HUMANWIN,
+            DRAW
+        }
 
     }
 }

@@ -86,6 +86,7 @@
                             if(CheckWin(nextBoard))
                             {
                                 firstMove = new Tuple<int, int>(i, j);
+                                currentPlays++;
                                 return;
                             }
                             queue.Enqueue((nextBoard, !isComputerTurn));
@@ -102,6 +103,7 @@
                         if(initialBoard[i, j] == '\0')
                         {
                             firstMove = new Tuple<int, int>(i, j);
+                            currentPlays++;
                             return;
                         }
                     }
@@ -125,6 +127,7 @@
 
             //Not a win state.
             if(player == 'O')currentState = ENUMS.AlgorithmState.INVALIDPATH;
+            if (currentPlays == 9) Game.GameState = ENUMS.GameState.DRAW;
             return false;
         }
 

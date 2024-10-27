@@ -8,7 +8,7 @@ namespace TicTacToe
 
         public static char[,] board = new char[3, 3];
         public static int plays;
-        //public static ENUMS.GameState GameState;
+        public static ENUMS.GameState GameState;
         public Game()
         {
             InitializeComponent();
@@ -53,8 +53,6 @@ namespace TicTacToe
             plays++;
 
             runAlgorithm(AlgorithmsLB.SelectedItem.ToString());
-            if (plays == 9)
-                checkWinner();
         }
 
         public static void UpdateButtons(int row, int col)
@@ -96,11 +94,7 @@ namespace TicTacToe
             }
             else
             {
-                if (plays == 9)
-                {
-                    MessageBox.Show("DRAW");
-                    disableButtons();
-                }
+                if (plays>=9 && GameState == ENUMS.GameState.DRAW) MessageBox.Show("DRAW");
             }
         }
 
@@ -140,10 +134,11 @@ namespace TicTacToe
                 {
                     board[sacrificeMove.Item1, sacrificeMove.Item2] = 'O';
                     UpdateButtons(sacrificeMove.Item1, sacrificeMove.Item2);
-                    MessageBox.Show(sacrificeMove.Item1.ToString() + sacrificeMove.Item2.ToString());
+                    //MessageBox.Show(sacrificeMove.Item1.ToString() + sacrificeMove.Item2.ToString());
 
                 }
             }
+
             checkWinner();
         }
         private void disableButtons()
