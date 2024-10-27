@@ -198,7 +198,7 @@
             Controls.Add(AlgorithmGB);
             Controls.Add(BoardGB);
             Name = "Game";
-            Text = "Form1";
+            Text = "TicTacToe";
             BoardGB.ResumeLayout(false);
             AlgorithmGB.ResumeLayout(false);
             ResumeLayout(false);
