@@ -120,6 +120,7 @@ namespace TicTacToe
                     plays++;
                     break;
                 case "BFS":
+                    Algorithms.BFS(currentBoard, ref firstMove);
                     break;
                 case "Iterative Deepening":
                     break;

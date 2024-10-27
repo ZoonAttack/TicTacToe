@@ -60,6 +60,55 @@
             //If not a win then check whether its the human who won or draw
             //CheckState(currentBoard);
         }
+
+
+
+        public static void BFS(char[,] initialBoard, ref Tuple<int, int> firstMove)
+        {
+            Queue<(char[,], bool)> queue = new Queue<(char[,], bool)>();
+
+            queue.Enqueue((initialBoard, true));
+
+            while(queue.Count > 0)
+            {
+                (char[,] currentBoard, bool isComputerTurn) = queue.Dequeue();
+
+                for(int i = 0; i < 3; i++)
+                {
+                    for(int j = 0; j < 3; j++)
+                    {
+                        if (currentBoard[i, j] == '\0')
+                        {
+                            //Make a new state from THIS state
+                            char[,] nextBoard = new char[3, 3];
+                            Array.Copy(currentBoard, nextBoard, currentBoard.Length);
+                            nextBoard[i, j] = isComputerTurn ? 'O' : 'X';
+                            if(CheckWin(nextBoard))
+                            {
+                                firstMove = new Tuple<int, int>(i, j);
+                                return;
+                            }
+                            queue.Enqueue((nextBoard, !isComputerTurn));
+                        }
+                    }
+                }
+            }
+            if (firstMove == null)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        if(initialBoard[i, j] == '\0')
+                        {
+                            firstMove = new Tuple<int, int>(i, j);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
         public static bool CheckWin(char[,] currentBoard, char player = 'O')
         {
                 //Horizontal check
