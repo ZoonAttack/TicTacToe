@@ -140,11 +140,71 @@
                 return;
             }
         }
-        //private void FoundWinningPath()
-        //{
 
-        //}
-        public  bool CheckWin(char[,] currentBoard, int plays, char player = 'O')
+        public void IterativeDeepening(char[,] initialBoard, ref Tuple<int, int> firstMove)
+        {
+            // Set a maximum depth based on the remaining moves (9 - current plays)
+            int maxDepth = 9 - Game.Plays; // or set to a predefined max like 5
+            Tuple<int, int> winningMove = null;
+
+            // Run depth-limited DFS for each depth level
+            for (int depth = 1; depth <= maxDepth; depth++)
+            {
+                if (DepthLimitedDFS(initialBoard, depth, true, ref winningMove))
+                {
+                    firstMove = winningMove;
+                    return; // Exit once a winning path is found
+                }
+            }
+
+            // backup move
+            if (firstMove == null && winningMove != null)
+            {
+                firstMove = winningMove;
+            }
+        }
+
+        // Depth-Limited DFS function
+        private bool DepthLimitedDFS(char[,] currentBoard, int depth, bool isComputerTurn, ref Tuple<int, int> firstMove)
+        {
+            if (depth == 0) return false; // Base case: depth limit reached
+
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (currentBoard[i, j] == '\0')
+                    {
+                        currentBoard[i, j] = isComputerTurn ? 'O' : 'X';
+
+                        // Record the first move only once
+                        if (isComputerTurn && firstMove == null)
+                        {
+                            firstMove = new Tuple<int, int>(i, j);
+                        }
+
+                        // Check if this move results in a win
+                        if (CheckWin(currentBoard, Game.Plays))
+                        {
+                            return true; // Winning path found
+                        }
+
+                        // Recursive DFS with a reduced depth limit
+                        if (DepthLimitedDFS(currentBoard, depth - 1, !isComputerTurn, ref firstMove))
+                        {
+                            return true; // Winning path found deeper
+                        }
+
+                        // Undo the move for backtracking
+                        currentBoard[i, j] = '\0';
+                    }
+                }
+            }
+
+            return false; // No winning path found at this depth
+        }
+
+        public bool CheckWin(char[,] currentBoard, int plays, char player = 'O')
         {
                 //Horizontal check
                 if (currentBoard[0, 0] == player && currentBoard[0, 1] == player && currentBoard[0, 2] == player) return true;

@@ -83,6 +83,11 @@ namespace TicTacToe
                     algorithm.BFS(currentBoard, ref firstMove);
                     plays++;
                     break;
+                case "Iterative Deepening":
+                    algorithm.ResetData();
+                    algorithm.IterativeDeepening(currentBoard, ref firstMove);
+                    plays++;
+                    break;
                     // Add other algorithms here as needed
             }
 
