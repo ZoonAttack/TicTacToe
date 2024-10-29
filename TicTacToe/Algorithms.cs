@@ -68,6 +68,7 @@
             Queue<(char[,], bool, Tuple<int, int>, bool, bool, int)> queue = new Queue<(char[,], bool, Tuple<int, int>, bool,bool, int)>();
             Tuple<int, int> winningFirstMove = null;
             Tuple<int, int> drawFirstMove = null;
+            Tuple<int, int> losingFirstMove = null;
             queue.Enqueue((initialBoard, true, null, false, false, currentPlays));
             while (queue.Count > 0)
             {
@@ -98,11 +99,17 @@
                                 winningFirstMove = stateFirstMove;
                                 goto foundWinningPath;
                             }
+                            //Handle draw state
                             //Probably could have done it better -_-
                             if (Game.Plays + 2 == 9)
                             {
                                //Game.GameState = ENUMS.GameState.DRAW;
                                 drawFirstMove = stateFirstMove;
+                            }
+                            //Handle losingState
+                            if(CheckWin(nextBoard, currentPlayNumber, 'X') && currentState == ENUMS.AlgorithmState.INVALIDPATH)
+                            {
+                                losingFirstMove = stateFirstMove;
                             }
                             queue.Enqueue((nextBoard, !isComputerTurn, stateFirstMove,  isFirstMoveDone, true, currentPlays + 1));
                             if(!ExploringPath)
@@ -125,6 +132,11 @@
             if (drawFirstMove != null)
             {
                 firstMove = drawFirstMove;
+                return;
+            }
+            if(losingFirstMove != null)
+            {
+                firstMove = losingFirstMove;
                 return;
             }
         }
