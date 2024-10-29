@@ -2,12 +2,12 @@
 {
     public class Algorithms
     {
-        static ENUMS.AlgorithmState currentState = ENUMS.AlgorithmState.INVALIDPATH;
-
-        static int currentPlays = Game.plays;
-        static bool isDraw = false;
-        static bool firstMoveDone = false;
-        public static void DFS(char[,] currentBoard, bool isComputerTurn, ref Tuple<int, int> firstMove, ref Tuple<int, int> sacrificeMove)
+        ENUMS.AlgorithmState currentState = ENUMS.AlgorithmState.INVALIDPATH;
+        
+         int currentPlays = Game.Plays;
+         bool isDraw = false;
+         bool firstMoveDone = false;
+        public void DFS(char[,] currentBoard, bool isComputerTurn, ref Tuple<int, int> firstMove, ref Tuple<int, int> sacrificeMove)
         {
             //If winning path is found. dont try other paths
             if (currentState == ENUMS.AlgorithmState.WINNINGPATH)
@@ -22,7 +22,7 @@
                     if (currentBoard[i,j] == '\0')
                     {
                         currentBoard[i, j] = isComputerTurn ? 'O' : 'X';
-                        if (currentPlays == Game.plays) firstMoveDone = true;
+                        if (currentPlays == Game.Plays) firstMoveDone = true;
 
                         if(isComputerTurn && firstMove == null && firstMoveDone) 
                             firstMove = new Tuple<int, int>(i, j);
@@ -45,7 +45,7 @@
                 }
             }
             //After finishing this path.. check if it results in a win 
-            if (CheckWin(currentBoard))
+            if (CheckWin(currentBoard, currentPlays))
             {
                 //If win then its a winning path
                 currentState = ENUMS.AlgorithmState.WINNINGPATH;
@@ -63,15 +63,15 @@
 
 
 
-        public static void BFS(char[,] initialBoard, ref Tuple<int, int> firstMove)
+        public void BFS(char[,] initialBoard, ref Tuple<int, int> firstMove)
         {
-            Queue<(char[,], bool)> queue = new Queue<(char[,], bool)>();
-
-            queue.Enqueue((initialBoard, true));
-
-            while(queue.Count > 0)
+            Queue<(char[,], bool, Tuple<int, int>, bool, bool, int)> queue = new Queue<(char[,], bool, Tuple<int, int>, bool,bool, int)>();
+            Tuple<int, int> winningFirstMove = null;
+            Tuple<int, int> drawFirstMove = null;
+            queue.Enqueue((initialBoard, true, null, false, false, currentPlays));
+            while (queue.Count > 0)
             {
-                (char[,] currentBoard, bool isComputerTurn) = queue.Dequeue();
+                (char[,] currentBoard, bool isComputerTurn, Tuple<int, int> stateFirstMove, bool isFirstMoveDone, bool ExploringPath, int currentPlayNumber) = queue.Dequeue();
 
                 for(int i = 0; i < 3; i++)
                 {
@@ -79,39 +79,60 @@
                     {
                         if (currentBoard[i, j] == '\0')
                         {
-                            //Make a new state from THIS state
                             char[,] nextBoard = new char[3, 3];
+                            //Make a new state from THIS state
                             Array.Copy(currentBoard, nextBoard, currentBoard.Length);
-                            nextBoard[i, j] = isComputerTurn ? 'O' : 'X';
-                            if(CheckWin(nextBoard))
+                            nextBoard[i, j] = isComputerTurn ? 'O' : 'X'; //Problem here with the way im checking ??
+                            if(!isFirstMoveDone && isComputerTurn && !firstMoveDone)
                             {
-                                firstMove = new Tuple<int, int>(i, j);
-                                currentPlays++;
-                                return;
+                                stateFirstMove = new Tuple<int, int>(i, j);
                             }
-                            queue.Enqueue((nextBoard, !isComputerTurn));
+                            if (currentPlays == Game.Plays) 
+                            { 
+                                isFirstMoveDone = true; firstMoveDone = true; 
+                            }
+                            //Either found a win or a draw state(human doesnt win)
+                            if (CheckWin(nextBoard, currentPlayNumber))
+                            {
+                                if(Game.GameState != ENUMS.GameState.DRAW)  currentState = ENUMS.AlgorithmState.WINNINGPATH;
+                                winningFirstMove = stateFirstMove;
+                                goto foundWinningPath;
+                            }
+                            //Probably could have done it better -_-
+                            if (Game.Plays + 2 == 9)
+                            {
+                               //Game.GameState = ENUMS.GameState.DRAW;
+                                drawFirstMove = stateFirstMove;
+                            }
+                            queue.Enqueue((nextBoard, !isComputerTurn, stateFirstMove,  isFirstMoveDone, true, currentPlays + 1));
+                            if(!ExploringPath)
+                            {
+                                isFirstMoveDone = false;
+                                firstMoveDone = false;
+                            }
                         }
                     }
                 }
+                currentPlays++;
             }
-            if (firstMove == null)
+        foundWinningPath:
+            if (winningFirstMove != null)
             {
-                for (int i = 0; i < 3; i++)
-                {
-                    for (int j = 0; j < 3; j++)
-                    {
-                        if(initialBoard[i, j] == '\0')
-                        {
-                            firstMove = new Tuple<int, int>(i, j);
-                            currentPlays++;
-                            return;
-                        }
-                    }
-                }
+                firstMove = winningFirstMove;
+                return;
+            }
+            
+            if (drawFirstMove != null)
+            {
+                firstMove = drawFirstMove;
+                return;
             }
         }
+        //private void FoundWinningPath()
+        //{
 
-        public static bool CheckWin(char[,] currentBoard, char player = 'O')
+        //}
+        public  bool CheckWin(char[,] currentBoard, int plays, char player = 'O')
         {
                 //Horizontal check
                 if (currentBoard[0, 0] == player && currentBoard[0, 1] == player && currentBoard[0, 2] == player) return true;
@@ -126,8 +147,7 @@
                 if (currentBoard[2, 0] == player && currentBoard[1, 1] == player && currentBoard[0, 2] == player) return true;
 
             //Not a win state.
-            if(player == 'O')currentState = ENUMS.AlgorithmState.INVALIDPATH;
-            if (currentPlays == 9) Game.GameState = ENUMS.GameState.DRAW;
+            if (player == 'O')currentState = ENUMS.AlgorithmState.INVALIDPATH;
             return false;
         }
 
@@ -142,10 +162,10 @@
         //        else Game.GameState = ENUMS.GameState.DRAW;
         //    }
         //}
-        public static void ResetData()
+        public  void ResetData()
         {
             currentState = ENUMS.AlgorithmState.INVALIDPATH;
-            currentPlays = Game.plays;
+            currentPlays = Game.Plays;
             isDraw = false;
             firstMoveDone = false;
         }

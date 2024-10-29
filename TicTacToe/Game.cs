@@ -1,46 +1,41 @@
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace TicTacToe
 {
     public partial class Game : Form
     {
+        #region PrivateFields
         private static List<Button> buttons = new List<Button>();
-
-        public static char[,] board = new char[3, 3];
-        public static int plays;
+        private static char[,] board = new char[3, 3];
+        private static int plays;
         public static ENUMS.GameState GameState;
+        #endregion
+
+        #region Properties
+        public static int Plays { get { return plays; } set { plays = value; } }
+        #endregion
+
+        #region Constructor
         public Game()
         {
             InitializeComponent();
-            buttons.Add(Top_LeftBTN);
-            buttons.Add(Top_CentreBTN);
-            buttons.Add(Top_RightBTN);
-            buttons.Add(Centre_LeftBTN);
-            buttons.Add(CentreBTN);
-            buttons.Add(Centre_RightBTN);
-            buttons.Add(Bottom_LeftBTN);
-            buttons.Add(Bottom_CentreBTN);
-            buttons.Add(Bottom_RightBTN);
-
-            foreach (Button button in buttons)
-            {
-                button.Enabled = false;
-            }
+            InitializeButtons();
+            DisableAllButtons();
         }
+        #endregion
 
+        #region UI_Methods
         private void Button_Click(object sender, EventArgs e)
         {
-
             if (AlgorithmsLB.SelectedItem == null)
             {
-                MessageBox.Show("Choose an algorithm first please..");
+                MessageBox.Show("Please select an algorithm first.");
                 return;
             }
 
             Button button = (Button)sender;
-
             int index = int.Parse(button.Tag.ToString());
-
             int row = index / 3;
             int col = index % 3;
 
@@ -49,110 +44,124 @@ namespace TicTacToe
                 board[row, col] = 'X';
                 button.Text = "X";
                 button.Enabled = false;
+                plays++;
+                RunSelectedAlgorithm(AlgorithmsLB.SelectedItem.ToString());
             }
-            plays++;
-
-            runAlgorithm(AlgorithmsLB.SelectedItem.ToString());
         }
 
-        public static void UpdateButtons(int row, int col)
+        private void ResetBTN_Click(object sender, EventArgs e)
+        {
+            ResetGame();
+        }
+
+        private void AlgorithmsLB_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (AlgorithmsLB.SelectedItem != null)
+            {
+                ResetGame();
+            }
+        }
+
+        #endregion
+
+        #region HelperMethods
+        private void RunSelectedAlgorithm(string algorithmName)
+        {
+            Algorithms algorithm = new Algorithms();
+            char[,] currentBoard = (char[,])board.Clone();
+            Tuple<int, int> firstMove = null;
+            Tuple<int, int> sacrificeMove = null;
+            switch (algorithmName)
+            {
+                case "DFS":
+                    algorithm.ResetData();
+                    algorithm.DFS(currentBoard, true, ref firstMove, ref sacrificeMove);
+                    plays++;
+                    break;
+                case "BFS":
+                    algorithm.ResetData();
+                    algorithm.BFS(currentBoard, ref firstMove);
+                    plays++;
+                    break;
+                    // Add other algorithms here as needed
+            }
+
+            ExecuteMove(firstMove ?? sacrificeMove);
+
+            CheckWinner(algorithm);
+        }
+
+        private void CheckWinner(Algorithms obj)
+        {
+            if(obj.CheckWin(board, plays, 'X'))
+            {
+                MessageBox.Show("Player won!!");
+                DisableAllButtons();
+            }
+            else if(obj.CheckWin(board, plays, 'O'))
+            {
+                MessageBox.Show("CPU won!!");
+                DisableAllButtons();
+            }
+            else
+            {
+                if(plays >= 9)
+                {
+                    MessageBox.Show("DRAW!!");
+                }
+            }
+        }
+
+        private void ExecuteMove(Tuple<int, int> move)
+        {
+            if (move != null)
+            {
+                board[move.Item1, move.Item2] = 'O';
+                UpdateButton(move.Item1, move.Item2, "O");
+            }
+        }
+
+        private void UpdateButton(int row, int col, string text)
         {
             foreach (Button button in buttons)
             {
-                int tag = Convert.ToInt32(button.Tag.ToString());
+                int tag = int.Parse(button.Tag.ToString());
                 if (tag / 3 == row && tag % 3 == col)
                 {
-                    button.Text = "O";
+                    button.Text = text;
                     button.Enabled = false;
                     return;
                 }
             }
         }
 
-        private void ResetBTN_Click(object sender, EventArgs e)
+
+        private void ResetGame()
         {
+            EnableAllButtons();
             foreach (Button button in buttons)
-            {
-                button.Enabled = true;
                 button.Text = string.Empty;
-            }
+
             board = new char[3, 3];
             plays = 0;
+            GameState = ENUMS.GameState.PLAYING; // Assuming an initial playing state
         }
-
-        private void checkWinner()
+        private void InitializeButtons()
         {
-            if (Algorithms.CheckWin(board, 'X'))
-            {
-                MessageBox.Show("PLAYER HAS WON!");
-                disableButtons();
-            }
-            else if (Algorithms.CheckWin(board, 'O'))
-            {
-                MessageBox.Show("COMPUTER HAS WON!");
-                disableButtons();
-            }
-            else
-            {
-                if (plays>=9 && GameState == ENUMS.GameState.DRAW) MessageBox.Show("DRAW");
-            }
+            buttons.AddRange([Top_LeftBTN, Top_CentreBTN, Top_RightBTN, Centre_LeftBTN, CentreBTN, Centre_RightBTN, Bottom_LeftBTN, Bottom_CentreBTN, Bottom_RightBTN]);
         }
 
-        private void runAlgorithm(string name)
-        {
-            //Sending a copy from the original board
-            char[,] currentBoard = new char[3, 3];
-            Array.Copy(board, currentBoard, board.Length);
-
-            Tuple<int, int> firstMove = null;
-            Tuple<int, int> sacrificeMove = null;
-            Algorithms.ResetData();
-            switch (name)
-            {
-                case "DFS":
-                    Algorithms.DFS(currentBoard, true, ref firstMove, ref sacrificeMove);
-                    plays++;
-                    break;
-                case "BFS":
-                    Algorithms.BFS(currentBoard, ref firstMove);
-                    plays++;
-                    break;
-                case "Iterative Deepening":
-                    break;
-                case "UCS":
-                    break;
-                default:
-                    break;
-            }
-            if (firstMove != null)
-            {
-                board[firstMove.Item1, firstMove.Item2] = 'O';
-                UpdateButtons(firstMove.Item1, firstMove.Item2);
-            }
-            if (sacrificeMove != null)
-            {
-                if (firstMove == null)
-                {
-                    board[sacrificeMove.Item1, sacrificeMove.Item2] = 'O';
-                    UpdateButtons(sacrificeMove.Item1, sacrificeMove.Item2);
-                    //MessageBox.Show(sacrificeMove.Item1.ToString() + sacrificeMove.Item2.ToString());
-
-                }
-            }
-
-            checkWinner();
-        }
-        private void disableButtons()
+        private void DisableAllButtons()
         {
             foreach (Button button in buttons)
-                button.Enabled = false; 
+                button.Enabled = false;
         }
-        private void AlgorithmsLB_SelectedIndexChanged(object sender, EventArgs e)
+
+        private void EnableAllButtons()
         {
-            if (AlgorithmsLB.SelectedItem != null)
-            {
-                ResetBTN.PerformClick();
-            }
+            foreach (Button button in buttons)
+                button.Enabled = true;
         }
+        #endregion
     }
 }

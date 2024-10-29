@@ -10,6 +10,7 @@ namespace TicTacToe
         }
         public enum GameState
         {
+            PLAYING,
             COMPUTERWIN,
             HUMANWIN,
             DRAW
