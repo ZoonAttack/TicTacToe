@@ -4,7 +4,7 @@
     {
         ENUMS.AlgorithmState currentState = ENUMS.AlgorithmState.INVALIDPATH;
         
-         int currentPlays = Game.Plays;
+         int CurrentPlays = Game.Plays;
          bool isDraw = false;
          bool firstMoveDone = false;
         public void DFS(char[,] currentBoard, bool isComputerTurn, ref Tuple<int, int> firstMove, ref Tuple<int, int> sacrificeMove)
@@ -22,19 +22,19 @@
                     if (currentBoard[i,j] == '\0')
                     {
                         currentBoard[i, j] = isComputerTurn ? 'O' : 'X';
-                        if (currentPlays == Game.Plays) firstMoveDone = true;
+                        if (CurrentPlays == Game.Plays) firstMoveDone = true;
 
                         if(isComputerTurn && firstMove == null && firstMoveDone) 
                             firstMove = new Tuple<int, int>(i, j);
                         
-                        currentPlays++;
+                        CurrentPlays++;
                         DFS(currentBoard, !isComputerTurn, ref firstMove, ref sacrificeMove); //Try out that path
 
                         //If no valid move just keep backtracking
                         if (currentState != ENUMS.AlgorithmState.WINNINGPATH)
                         {
                             currentBoard[i, j] = '\0';
-                            currentPlays--;
+                            CurrentPlays--;
                             if (i == firstMove.Item1 && j == firstMove.Item2)
                             {
                                 firstMoveDone = false;
@@ -45,7 +45,7 @@
                 }
             }
             //After finishing this path.. check if it results in a win 
-            if (CheckWin(currentBoard, currentPlays))
+            if (CheckWin(currentBoard, CurrentPlays))
             {
                 //If win then its a winning path
                 currentState = ENUMS.AlgorithmState.WINNINGPATH;
@@ -69,7 +69,7 @@
             Tuple<int, int> winningFirstMove = null;
             Tuple<int, int> drawFirstMove = null;
             Tuple<int, int> losingFirstMove = null;
-            queue.Enqueue((initialBoard, true, null, false, false, currentPlays));
+            queue.Enqueue((initialBoard, true, null, false, false, CurrentPlays));
             while (queue.Count > 0)
             {
                 (char[,] currentBoard, bool isComputerTurn, Tuple<int, int> stateFirstMove, bool isFirstMoveDone, bool ExploringPath, int currentPlayNumber) = queue.Dequeue();
@@ -88,7 +88,7 @@
                             {
                                 stateFirstMove = new Tuple<int, int>(i, j);
                             }
-                            if (currentPlays == Game.Plays) 
+                            if (CurrentPlays == Game.Plays) 
                             { 
                                 isFirstMoveDone = true; firstMoveDone = true; 
                             }
@@ -111,7 +111,7 @@
                             {
                                 losingFirstMove = stateFirstMove;
                             }
-                            queue.Enqueue((nextBoard, !isComputerTurn, stateFirstMove,  isFirstMoveDone, true, currentPlays + 1));
+                            queue.Enqueue((nextBoard, !isComputerTurn, stateFirstMove,  isFirstMoveDone, true, CurrentPlays + 1));
                             if(!ExploringPath)
                             {
                                 isFirstMoveDone = false;
@@ -120,7 +120,7 @@
                         }
                     }
                 }
-                currentPlays++;
+                CurrentPlays++;
             }
         foundWinningPath:
             if (winningFirstMove != null)
@@ -237,7 +237,7 @@
         public  void ResetData()
         {
             currentState = ENUMS.AlgorithmState.INVALIDPATH;
-            currentPlays = Game.Plays;
+            CurrentPlays = Game.Plays;
             isDraw = false;
             firstMoveDone = false;
         }
